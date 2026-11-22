@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Piano" />
+    <meta name="theme-color" content="#121316" />
+    <title>Piano</title>
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar" aria-label="Contrôles">
+        <div class="pill-group" role="group" aria-label="Octave">
+          <button
+            type="button"
+            class="pill-btn icon-btn"
+            id="octave-down"
+            aria-label="Octave inférieure"
+          >
+            −
+          </button>
+          <span class="octave-label" id="octave-label" aria-live="polite">Do3 – Si4</span>
+          <button
+            type="button"
+            class="pill-btn icon-btn"
+            id="octave-up"
+            aria-label="Octave supérieure"
+          >
+            +
+          </button>
+        </div>
+
+        <div class="topbar-actions">
+          <button
+            type="button"
+            class="pill-btn"
+            id="install-btn"
+            hidden
+          >
+            Installer
+          </button>
+          <button
+            type="button"
+            class="pill-btn"
+            id="settings-btn"
+          >
+            Réglages
+          </button>
+        </div>
+      </header>
+
+      <div class="felt-strip" aria-hidden="true"></div>
+
+      <section
+        class="keyboard"
+        id="keyboard"
+        aria-label="Clavier de piano"
+      ></section>
+    </main>
+
+    <dialog class="modal" id="settings-dialog" aria-labelledby="settings-title">
+      <form method="dialog" class="modal-card">
+        <div class="modal-header">
+          <h2 id="settings-title">Réglages</h2>
+        </div>
+
+        <div class="setting-block">
+          <span class="setting-label">Son</span>
+          <div class="segmented" role="radiogroup" aria-label="Mode sonore">
+            <button
+              type="button"
+              class="seg-btn"
+              data-sound-mode="natural"
+              role="radio"
+              aria-checked="true"
+            >
+              Piano naturel
+            </button>
+            <button
+              type="button"
+              class="seg-btn"
+              data-sound-mode="sustained"
+              role="radio"
+              aria-checked="false"
+            >
+              Son tenu
+            </button>
+          </div>
+        </div>
+
+        <label class="setting-row" for="toggle-labels">
+          <span class="setting-label">Afficher Do, Ré, Mi…</span>
+          <input type="checkbox" id="toggle-labels" class="switch" checked />
+        </label>
+
+        <div class="modal-footer">
+          <button type="submit" class="close-btn">Fermer</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="install-dialog" aria-labelledby="install-title">
+      <form method="dialog" class="modal-card">
+        <div class="modal-header">
+          <h2 id="install-title">Installer sur iPhone</h2>
+        </div>
+
+        <ol class="install-steps">
+          <li>Touchez le bouton <strong>Partager</strong> dans Safari.</li>
+          <li>Choisissez <strong>« Sur l’écran d’accueil »</strong> puis <strong>Ajouter</strong>.</li>
+        </ol>
+
+        <div class="modal-footer">
+          <button type="submit" class="close-btn">Fermer</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
