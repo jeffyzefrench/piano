@@ -105,50 +105,23 @@ function isStandalonePWA() {
   );
 }
 
-const COMPACT_BREAKPOINT_PX = 620;
-
-let isCompactLayout = window.innerWidth < COMPACT_BREAKPOINT_PX;
-
-function getKeyboardSpec() {
-  // Portrait/narrow phones: 1 octave + top Do (13 keys, 8 white keys) for comfortable touch width.
-  // Landscape/wide screens: 2 octaves (24 keys, 14 white keys).
-  if (isCompactLayout) {
-    const keys = [
-      ...OCTAVE_PATTERN.map((def) => ({ ...def, semitone: def.offset, octOffset: 0 })),
-      { offset: 0, name: "Do", black: false, semitone: 12, octOffset: 1 },
-    ];
-    return {
-      whiteTotal: 8,
-      keys,
-      rangeLabel: `Do${settings.baseOctave} – Do${settings.baseOctave + 1}`,
-    };
-  }
-
-  const keys = [];
-  for (let oct = 0; oct < 2; oct++) {
-    for (const def of OCTAVE_PATTERN) {
-      keys.push({ ...def, semitone: oct * 12 + def.offset, octOffset: oct });
-    }
-  }
-  return {
-    whiteTotal: 14,
-    keys,
-    rangeLabel: `Do${settings.baseOctave} – Si${settings.baseOctave + 1}`,
-  };
-}
+const KEYBOARD_KEYS = [
+  ...OCTAVE_PATTERN.map((def) => ({ ...def, semitone: def.offset, octOffset: 0 })),
+  { offset: 0, name: "Do", black: false, semitone: 12, octOffset: 1 },
+];
+const WHITE_KEY_TOTAL = 8;
 
 function renderKeyboard() {
   releaseAllNotes();
   keyboardEl.replaceChildren();
   keyByMidi.clear();
 
-  const { whiteTotal, keys, rangeLabel } = getKeyboardSpec();
-  keyboardEl.style.setProperty("--white-keys", String(whiteTotal));
+  keyboardEl.style.setProperty("--white-keys", String(WHITE_KEY_TOTAL));
 
   const baseMidi = frenchOctaveToBaseMidi(settings.baseOctave);
   let whiteCount = 0;
 
-  for (const def of keys) {
+  for (const def of KEYBOARD_KEYS) {
     const midi = baseMidi + def.semitone;
     const btn = document.createElement("button");
     btn.type = "button";
@@ -161,7 +134,7 @@ function renderKeyboard() {
 
     if (def.black) {
       // Place black key centered cleanly on the seam after the previous white key.
-      btn.style.left = `${(whiteCount / whiteTotal) * 100}%`;
+      btn.style.left = `${(whiteCount / WHITE_KEY_TOTAL) * 100}%`;
     } else {
       const label = document.createElement("span");
       label.className = "key-label";
@@ -174,7 +147,7 @@ function renderKeyboard() {
     keyByMidi.set(midi, btn);
   }
 
-  octaveLabelEl.textContent = rangeLabel;
+  octaveLabelEl.textContent = `Do${settings.baseOctave} – Do${settings.baseOctave + 1}`;
   octaveDownBtn.disabled = settings.baseOctave <= MIN_FRENCH_OCTAVE;
   octaveUpBtn.disabled = settings.baseOctave >= MAX_FRENCH_OCTAVE;
 }
@@ -342,13 +315,6 @@ setupModalDismiss(settingsDialog);
 setupModalDismiss(installDialog);
 
 window.matchMedia("(display-mode: standalone)").addEventListener("change", syncUI);
-window.addEventListener("resize", () => {
-  const nextCompact = window.innerWidth < COMPACT_BREAKPOINT_PX;
-  if (nextCompact !== isCompactLayout) {
-    isCompactLayout = nextCompact;
-    renderKeyboard();
-  }
-});
 
 // Optional desktop keyboard playability
 window.addEventListener("keydown", (e) => {
