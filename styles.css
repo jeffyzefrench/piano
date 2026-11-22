@@ -126,6 +126,13 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.piano-frame {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .felt-strip {
   height: 6px;
   flex: 0 0 auto;
@@ -135,11 +142,12 @@ body {
 }
 
 .keyboard {
+  --white-keys: 14;
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
   display: grid;
-  grid-template-columns: repeat(14, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--white-keys), minmax(0, 1fr));
   gap: 2px;
   padding: 0 2px 3px;
   background: #090a0c;
@@ -190,7 +198,7 @@ body {
   position: absolute;
   top: 0;
   z-index: 2;
-  width: calc((100% / 14) * 0.62);
+  width: calc((100% / var(--white-keys)) * 0.62);
   height: 60%;
   transform: translateX(-50%);
   border-radius: 0 0 6px 6px;
@@ -228,8 +236,8 @@ body {
   display: none;
 }
 
-/* Portrait compactness on narrow phones */
-@media (max-width: 520px) and (orientation: portrait) {
+/* Portrait: 1 octave + top Do with comfortable key height for thumb/finger reach */
+@media (max-width: 619px) and (orientation: portrait) {
   .topbar {
     padding-bottom: 8px;
   }
@@ -239,12 +247,18 @@ body {
     font-size: 13px;
   }
 
+  .piano-frame {
+    margin: auto 0;
+    flex: 0 1 auto;
+    height: min(420px, 58dvh);
+  }
+
   .key--white {
-    padding-bottom: 10px;
+    padding-bottom: 14px;
   }
 
   .key-label {
-    font-size: 10px;
+    font-size: 13px;
   }
 }
 
