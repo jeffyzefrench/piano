@@ -105,43 +105,49 @@ function isStandalonePWA() {
   );
 }
 
+const KEYBOARD_KEYS = [
+  ...OCTAVE_PATTERN.map((def) => ({ ...def, semitone: def.offset, octOffset: 0 })),
+  { offset: 0, name: "Do", black: false, semitone: 12, octOffset: 1 },
+];
+const WHITE_KEY_TOTAL = 8;
+
 function renderKeyboard() {
   releaseAllNotes();
   keyboardEl.replaceChildren();
   keyByMidi.clear();
 
+  keyboardEl.style.setProperty("--white-keys", String(WHITE_KEY_TOTAL));
+
   const baseMidi = frenchOctaveToBaseMidi(settings.baseOctave);
   let whiteCount = 0;
 
-  for (let oct = 0; oct < 2; oct++) {
-    for (const def of OCTAVE_PATTERN) {
-      const midi = baseMidi + oct * 12 + def.offset;
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = def.black ? "key key--black" : "key key--white";
-      if (def.offset === 0) {
-        btn.classList.add("is-c");
-      }
-      btn.dataset.midi = String(midi);
-      btn.setAttribute("aria-label", `${def.name}${settings.baseOctave + oct}`);
-
-      if (def.black) {
-        // Place black key centered cleanly on the seam after the previous white key.
-        btn.style.left = `${(whiteCount / 14) * 100}%`;
-      } else {
-        const label = document.createElement("span");
-        label.className = "key-label";
-        label.textContent = def.name;
-        btn.appendChild(label);
-        whiteCount += 1;
-      }
-
-      keyboardEl.appendChild(btn);
-      keyByMidi.set(midi, btn);
+  for (const def of KEYBOARD_KEYS) {
+    const midi = baseMidi + def.semitone;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = def.black ? "key key--black" : "key key--white";
+    if (def.offset === 0) {
+      btn.classList.add("is-c");
     }
+    btn.dataset.midi = String(midi);
+    btn.setAttribute("aria-label", `${def.name}${settings.baseOctave + def.octOffset}`);
+
+    if (def.black) {
+      // Place black key centered cleanly on the seam after the previous white key.
+      btn.style.left = `${(whiteCount / WHITE_KEY_TOTAL) * 100}%`;
+    } else {
+      const label = document.createElement("span");
+      label.className = "key-label";
+      label.textContent = def.name;
+      btn.appendChild(label);
+      whiteCount += 1;
+    }
+
+    keyboardEl.appendChild(btn);
+    keyByMidi.set(midi, btn);
   }
 
-  octaveLabelEl.textContent = `Do${settings.baseOctave} – Si${settings.baseOctave + 1}`;
+  octaveLabelEl.textContent = `Do${settings.baseOctave} – Do${settings.baseOctave + 1}`;
   octaveDownBtn.disabled = settings.baseOctave <= MIN_FRENCH_OCTAVE;
   octaveUpBtn.disabled = settings.baseOctave >= MAX_FRENCH_OCTAVE;
 }
