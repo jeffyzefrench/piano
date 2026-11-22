@@ -1,4 +1,5 @@
-const CACHE_NAME = "piano-pwa-v2";
+const CACHE_NAME = "piano-pwa-v3";
+const NETWORK_TIMEOUT_MS = 2500;
 const ASSETS = [
   "./",
   "./index.html",
@@ -32,22 +33,43 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+async function fetchWithTimeout(request) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), NETWORK_TIMEOUT_MS);
+  try {
+    return await fetch(request, { cache: "no-cache", signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== "basic") {
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      try {
+        const response = await fetchWithTimeout(event.request);
+        if (response && response.ok && response.type === "basic") {
+          event.waitUntil(cache.put(event.request, response.clone()));
           return response;
         }
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        return response;
-      });
-    })
+      } catch {
+        // Offline or slow network: fall back to cache below.
+      }
+
+      const cached = await cache.match(event.request);
+      if (cached) return cached;
+
+      if (event.request.mode === "navigate") {
+        const indexFallback = await cache.match("./index.html");
+        if (indexFallback) return indexFallback;
+      }
+
+      return Response.error();
+    })()
   );
 });
